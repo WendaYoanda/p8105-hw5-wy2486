@@ -47,3 +47,22 @@ birthday_repeated(50)
 head(birthday_results, 10)
 birthday_summary
 ```
+The simulation results show that the probability of at least two people sharing a birthday increases as the group size increases. For a group of 2 people, the estimated probability is `r round(100 * birthday_summary$prob_repeat[birthday_summary$n_people == 2], 2)`%, compared with `r round(100 * birthday_summary$prob_repeat[birthday_summary$n_people == 5], 2)`% for 5 people and `r round(100 * birthday_summary$prob_repeat[birthday_summary$n_people == 10], 2)`% for 10 people.
+
+### Probability Plot
+
+The plot below shows how the probability of sharing a birthday changes as the group size increases.
+
+```{r}
+birthday_summary |>
+  ggplot(aes(x = n_people, y = prob_repeat)) +
+  geom_point() +
+  geom_line() +
+  labs(
+    title = "Probability of Shared Birthdays",
+    x = "Number of People",
+    y = "Probability of Shared Birthday"
+  )
+```
+
+The plot shows a nonlinear increasing relationship, with the probability reaching approximately 50% at a group size of 23 people and approaching 100% as the group size increases toward 50.
