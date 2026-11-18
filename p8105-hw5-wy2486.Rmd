@@ -66,3 +66,80 @@ birthday_summary |>
 ```
 
 The plot shows a nonlinear increasing relationship, with the probability reaching approximately 50% at a group size of 23 people and approaching 100% as the group size increases toward 50.
+
+## Problem 2: Longitudinal Study
+
+In this problem, I use iteration to import longitudinal data from multiple participants and organize the observations into a tidy dataframe.
+
+### Data Import and Tidying
+
+The code below reads the participant files and organizes the data by subject, study group, and week.
+
+```{r message=FALSE}
+full_df =
+  tibble(
+    files = list.files("data/", pattern = "\\.csv$"),
+    path = str_c("data/", files)
+  ) |>
+  mutate(
+    data = map(path, read_csv)
+  ) |>
+  unnest(data)
+
+tidy_df =
+  full_df |>
+  mutate(
+    files = str_replace(files, "\\.csv$", ""),
+    group = str_sub(files, 1, 3)
+  ) |>
+  pivot_longer(
+    week_1:week_8,
+    names_to = "week",
+    values_to = "outcome",
+    names_prefix = "week_"
+  ) |>
+  mutate(
+    week = as.numeric(week)
+  ) |>
+  select(
+    group,
+    subj = files,
+    week,
+    outcome
+  )
+
+head(tidy_df, 10)
+```
+
+### Spaghetti Plot
+
+The following plot shows how each participant's outcome changes over the eight weeks, allowing us to compare the control and experimental groups.
+
+```{r}
+tidy_df |>
+  ggplot(
+    aes(
+      x = week,
+      y = outcome,
+      group = subj,
+      color = group
+    )
+  ) +
+  geom_point() +
+  geom_path() +
+  facet_grid(
+    ~group,
+    labeller = as_labeller(
+      c(con = "Control", exp = "Experimental")
+    )
+  ) +
+  labs(
+    title = "Longitudinal Observations by Study Group",
+    x = "Week",
+    y = "Outcome",
+    color = "Study Group"
+  )
+```
+
+The spaghetti plot shows that the control and experimental groups have different patterns over time. In the control group, outcomes remain relatively stable across the eight weeks, although there are some fluctuations between participants. In the experimental group, outcomes generally increase over time. There are also differences in outcomes among participants within each group. Overall, the experimental group shows a greater increase in outcomes compared to the control group.
+
